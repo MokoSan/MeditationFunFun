@@ -3,11 +3,13 @@
 module MeditationFunFun.Api.Common 
 
     open System.IO
+    open System.Text
 
     open Newtonsoft.Json
     open Newtonsoft.Json.Serialization
 
     open Suave
+    open Suave.RequestErrors
     open Suave.Http
     open Suave.Filters
     open Suave.Operators
@@ -17,12 +19,12 @@ module MeditationFunFun.Api.Common
     [<AutoOpen>]
     type RestResource<'TController> = {
         GetAll      : unit                -> 'TController seq
-        GetById     : int                 -> 'TController option 
-        IsExists    : int                 -> bool
+        //GetById     : int                 -> 'TController option 
+        //IsExists    : int                 -> bool
         Create      : 'TController        -> 'TController
-        Update      : 'TController        -> 'TController option 
-        UpdateById  : int -> 'TController -> 'TController option
-        Delete      : int                 -> unit
+        //Update      : 'TController        -> 'TController option 
+        //UpdateById  : int -> 'TController -> 'TController option
+        //Delete      : int                 -> unit
     }
 
 
@@ -37,8 +39,19 @@ module MeditationFunFun.Api.Common
         |> OK
         >=> setMimeType "application/json; charset=utf-8"
 
+    let UnJsonize<'a> ( json : string ) : 'a =
+        JsonConvert.DeserializeObject< 'a >( json ) 
+
+    let getResourceFromRequest<'TController>( request : HttpRequest ) = 
+        let getString ( raw : byte[] ) : string = 
+            Encoding.UTF8.GetString( raw )
+        request.rawForm |> getString |> UnJsonize<'TController>
+
     let getWebPartFromRestResource ( resourceName : string ) ( resource : RestResource<'TController> ) : WebPart = 
-        let fullResourcePath = Path.Combine ( apiBaseString, resourceName ) 
+        let fullResourcePath = Path.Combine ( apiBaseString, resourceName ) + "/" 
         let getAll = warbler ( fun _ -> resource.GetAll() |> Jsonize )
 
-        path fullResourcePath >=> GET >=> getAll
+        path fullResourcePath >=> choose [
+            GET  >=> getAll
+            POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
+        ]

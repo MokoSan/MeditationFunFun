@@ -22,7 +22,7 @@ module MeditationFunFun.Api.Common
         //GetById     : int                 -> 'TController option 
         //IsExists    : int                 -> bool
         Create      : 'TController        -> 'TController
-        //Update      : 'TController        -> 'TController option 
+        Update      : 'TController        -> 'TController option 
         //UpdateById  : int -> 'TController -> 'TController option
         //Delete      : int                 -> unit
     }
@@ -48,10 +48,17 @@ module MeditationFunFun.Api.Common
         request.rawForm |> getString |> UnJsonize<'TController>
 
     let getWebPartFromRestResource ( resourceName : string ) ( resource : RestResource<'TController> ) : WebPart = 
+
         let fullResourcePath = Path.Combine ( apiBaseString, resourceName ) + "/" 
-        let getAll = warbler ( fun _ -> resource.GetAll() |> Jsonize )
+        let getAll           = warbler ( fun _ -> resource.GetAll() |> Jsonize )
+        let badRequest       = BAD_REQUEST "Resource Not Found"
+
+        let handleResouce requestError = function 
+            | Some r -> r |> Jsonize
+            | None   -> requestError
 
         path fullResourcePath >=> choose [
             GET  >=> getAll
             POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
+            PUT  >=> request ( getResourceFromRequest >> resource.Update >> handleResouce badRequest )
         ]

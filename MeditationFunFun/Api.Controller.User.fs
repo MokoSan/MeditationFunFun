@@ -35,6 +35,9 @@
         | null -> None
         | u    -> Some ( u )
 
+    let submitToDbAsync =
+        databaseContext.SubmitUpdatesAsync() |> Async.StartAsTask
+        
     // Corresponding User Control Functions 
     // GET 
     let getAllUsers() : seq< User > = 
@@ -53,7 +56,7 @@
         }
 
         let newUserDbo = createUserDboFromUser user
-        databaseContext.SubmitUpdates() 
+        submitToDbAsync |> ignore
         newUser
 
     // PUT 
@@ -64,7 +67,7 @@
             let u = userById.Value 
             u.Name  <- userToUpdate.Name
             u.Email <- userToUpdate.Email
-            databaseContext.SubmitUpdates()
+            submitToDbAsync |> ignore
             Some userToUpdate
             
     let updateUser ( userToUpdate : User ) : User option =
@@ -76,7 +79,7 @@
         match user with 
         | Some u ->
             u.Delete() 
-            databaseContext.SubmitUpdates()
+            submitToDbAsync |> ignore
         | None   -> () 
 
     // HEAD

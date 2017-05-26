@@ -1,65 +1,86 @@
 ﻿module MeditationFunFun.Api.Controller.User
 
     open MeditationFunFun.Api.Common
+    open MeditationFunFun.Database
 
     open System.Collections.Generic
 
     // User Data Model
     type User = {
-        Id    : int
         Name  : string
         Email : string
     }
 
-    let private userStorage = Dictionary<int, User>() 
+    type UserDbo = sql.dataContext.``dbo.UsersEntity`` 
+
+    // Helpers 
+    let getUserFromUserDbo ( user : UserDbo ) : User = 
+        { Name = user.Name; Email = user.Email }
+
+    let createUserDboFromUser ( user : User ) : UserDbo = 
+        let newUserDbo = dbo.Users.Create()
+        newUserDbo.Name  <- user.Name
+        newUserDbo.Email <- user.Email
+        newUserDbo
+
+    let getUserDboFromId ( userId : int ) : UserDbo option =
+        let user = query {
+            for user in dbo.Users do
+            where ( user.Id = userId ) 
+            select user 
+            headOrDefault
+        } 
+
+        match user with
+        | null -> None
+        | u    -> Some ( u )
 
     // Corresponding User Control Functions 
-
     // GET 
-    let getAllUsers() = 
-        userStorage.Values |> Seq.map(fun p -> p)
+    let getAllUsers() : seq< User > = 
+        dbo.Users |> Seq.map getUserFromUserDbo
 
-    let getUserById id =
-        if userStorage.ContainsKey( id ) then
-            Some userStorage.[id]
-        else
-            None
+    let getUserById ( userId : int ) : User option =
+        let userById = getUserDboFromId userId  
+        if userById.IsNone then None
+        else getUserFromUserDbo userById.Value |> Some
 
     // POST
-    let createUser ( user : User ) =
-        let id = userStorage.Values.Count + 1
+    let createUser ( user : User ) : User =
         let newUser = {
-            Id    = id
             Name  = user.Name 
             Email = user.Email 
         }
 
-        userStorage.Add( id, newUser ) |> ignore
+        let newUserDbo = createUserDboFromUser user
+        databaseContext.SubmitUpdates() 
         newUser
 
     // PUT 
     let updateUserWithId ( userId : int ) ( userToUpdate : User ) : User option = 
-        if userStorage.ContainsKey( userId ) then
-            let updatedUser = {
-                Id    = userToUpdate.Id
-                Name  = userToUpdate.Name
-                Email = userToUpdate.Email 
-            }
-
-            userStorage.[ updatedUser.Id ] <- updatedUser 
-            updatedUser |> Some
-        else
-            None
-
+        let userById = getUserDboFromId userId  
+        if userById.IsNone then None
+        else 
+            let u = userById.Value 
+            u.Name  <- userToUpdate.Name
+            u.Email <- userToUpdate.Email
+            databaseContext.SubmitUpdates()
+            Some userToUpdate
+            
     let updateUser ( userToUpdate : User ) : User option =
-        updateUserWithId userToUpdate.Id userToUpdate 
+        failwith "Not Implemented Construct"
 
     // DELETE
-    let deleteUser userId = 
-        userStorage.Remove( userId ) |> ignore
+    let deleteUser ( userId : int ) : unit = 
+        let user = getUserDboFromId userId 
+        match user with 
+        | Some u ->
+            u.Delete() 
+            databaseContext.SubmitUpdates()
+        | None   -> () 
 
     // HEAD
-    let isUserExists = userStorage.ContainsKey
+    let isUserExists ( userId : int ) = ( getUserDboFromId userId ).IsSome
         
     // Combined web part
     let userWebPart = getWebPartFromRestResource {

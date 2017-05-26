@@ -9,3 +9,5 @@
     type sql             = SqlDataProvider< ConnectionString = connectionString > 
     let databaseContext  = sql.GetDataContext() 
     let dbo              = databaseContext.Dbo
+
+    let submitToDbAsync  = databaseContext.SubmitUpdatesAsync() |> Async.StartAsTask

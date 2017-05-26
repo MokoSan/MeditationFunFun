@@ -66,6 +66,7 @@
     <Content Include="packages.config" />
     <None Include="SQL Scripts\createDb.sql" />
     <None Include="SQL Scripts\createUser.sql" />
+    <None Include="SQL Scripts\createJournal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

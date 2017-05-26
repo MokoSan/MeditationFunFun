@@ -34,9 +34,6 @@
         match user with
         | null -> None
         | u    -> Some ( u )
-
-    let submitToDbAsync =
-        databaseContext.SubmitUpdatesAsync() |> Async.StartAsTask
         
     // Corresponding User Control Functions 
     // GET 

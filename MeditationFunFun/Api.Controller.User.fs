@@ -14,6 +14,8 @@
     let private userStorage = Dictionary<int, User>() 
 
     // Corresponding User Control Functions 
+
+    // GET 
     let getAllUsers() = 
         userStorage.Values |> Seq.map(fun p -> p)
 
@@ -23,6 +25,7 @@
         else
             None
 
+    // POST
     let createUser ( user : User ) =
         let id = userStorage.Values.Count + 1
         let newUser = {
@@ -34,6 +37,7 @@
         userStorage.Add( id, newUser ) |> ignore
         newUser
 
+    // PUT 
     let updateUserWithId ( userId : int ) ( userToUpdate : User ) : User option = 
         if userStorage.ContainsKey( userId ) then
             let updatedUser = {
@@ -50,13 +54,16 @@
     let updateUser ( userToUpdate : User ) : User option =
         updateUserWithId userToUpdate.Id userToUpdate 
 
+    // DELETE
     let deleteUser userId = 
         userStorage.Remove( userId ) |> ignore
 
+    // HEAD
     let isUserExists = userStorage.ContainsKey
         
     // Combined web part
-    let userWebPart = getWebPartFromRestResource "user" {
+    let userWebPart = getWebPartFromRestResource {
+        Name       = "user"
         GetAll     = getAllUsers
         GetById    = getUserById
         Create     = createUser

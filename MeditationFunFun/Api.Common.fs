@@ -18,6 +18,7 @@ module MeditationFunFun.Api.Common
 
     [<AutoOpen>]
     type RestResource<'TController> = {
+        Name        : string
         GetAll      : unit                -> 'TController seq
         GetById     : int                 -> 'TController option 
         Create      : 'TController        -> 'TController
@@ -46,9 +47,9 @@ module MeditationFunFun.Api.Common
             Encoding.UTF8.GetString( raw )
         request.rawForm |> getString |> UnJsonize<'TController>
 
-    let getWebPartFromRestResource ( resourceName : string ) ( resource : RestResource<'TController> ) : WebPart = 
+    let getWebPartFromRestResource ( resource : RestResource<'TController> ) : WebPart = 
 
-        let fullResourcePath = Path.Combine ( apiBaseString, resourceName )
+        let fullResourcePath = Path.Combine ( apiBaseString, resource.Name ) 
         let getAll           = warbler ( fun _ -> resource.GetAll() |> Jsonize )
         let badRequest       = BAD_REQUEST "Resource Not Found"
 

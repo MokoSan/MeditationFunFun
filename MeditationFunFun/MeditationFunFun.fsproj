@@ -58,6 +58,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Api.Common.fs" />
     <Compile Include="Api.Controller.User.fs" />
+    <Compile Include="Api.Controller.Journal.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Main.fs" />
     <None Include="App.config" />

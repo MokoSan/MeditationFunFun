@@ -17,6 +17,12 @@
     let getAllUsers() = 
         userStorage.Values |> Seq.map(fun p -> p)
 
+    let getUserById id =
+        if userStorage.ContainsKey( id ) then
+            Some userStorage.[id]
+        else
+            None
+
     let createUser ( user : User ) =
         let id = userStorage.Values.Count + 1
         let newUser = {
@@ -43,10 +49,19 @@
 
     let updateUser ( userToUpdate : User ) : User option =
         updateUserWithId userToUpdate.Id userToUpdate 
+
+    let deleteUser userId = 
+        userStorage.Remove( userId ) |> ignore
+
+    let isUserExists = userStorage.ContainsKey
         
     // Combined web part
     let userWebPart = getWebPartFromRestResource "user" {
-        GetAll = getAllUsers
-        Create = createUser
-        Update = updateUser
+        GetAll     = getAllUsers
+        GetById    = getUserById
+        Create     = createUser
+        Update     = updateUser
+        UpdateById = updateUserWithId
+        Delete     = deleteUser 
+        IsExists   = isUserExists 
     }

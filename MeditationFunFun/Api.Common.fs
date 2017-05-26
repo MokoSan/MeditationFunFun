@@ -19,14 +19,13 @@ module MeditationFunFun.Api.Common
     [<AutoOpen>]
     type RestResource<'TController> = {
         GetAll      : unit                -> 'TController seq
-        //GetById     : int                 -> 'TController option 
-        //IsExists    : int                 -> bool
+        GetById     : int                 -> 'TController option 
         Create      : 'TController        -> 'TController
         Update      : 'TController        -> 'TController option 
-        //UpdateById  : int -> 'TController -> 'TController option
-        //Delete      : int                 -> unit
+        UpdateById  : int -> 'TController -> 'TController option
+        Delete      : int                 -> unit
+        IsExists    : int                 -> bool
     }
-
 
     let apiVersion    = "1" // TODO: Change this to read from a config
     let apiBaseString =  sprintf "/api/v%s/" apiVersion 
@@ -49,16 +48,39 @@ module MeditationFunFun.Api.Common
 
     let getWebPartFromRestResource ( resourceName : string ) ( resource : RestResource<'TController> ) : WebPart = 
 
-        let fullResourcePath = Path.Combine ( apiBaseString, resourceName ) + "/" 
+        let fullResourcePath = Path.Combine ( apiBaseString, resourceName )
         let getAll           = warbler ( fun _ -> resource.GetAll() |> Jsonize )
         let badRequest       = BAD_REQUEST "Resource Not Found"
 
-        let handleResouce requestError = function 
+        let resourceIdPath =
+            PrintfFormat<(int -> string),unit,string,string,int>(fullResourcePath + "/%d")
+
+        let handleResource requestError = function 
             | Some r -> r |> Jsonize
             | None   -> requestError
 
-        path fullResourcePath >=> choose [
-            GET  >=> getAll
-            POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
-            PUT  >=> request ( getResourceFromRequest >> resource.Update >> handleResouce badRequest )
+        let getResourceById =
+            resource.GetById >> handleResource ( NOT_FOUND "Resource Not Found" )
+
+        let updateResourceById id = 
+            request ( getResourceFromRequest >> ( resource.UpdateById id ) >> handleResource badRequest )
+
+        let deleteResourceById id = 
+            resource.Delete id
+            NO_CONTENT
+
+        let isResourceExists id =
+            if resource.IsExists id then OK "" else NOT_FOUND ""
+
+        choose [
+            path fullResourcePath >=> choose [
+                GET  >=> getAll
+                POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
+                PUT  >=> request ( getResourceFromRequest >> resource.Update >> handleResource badRequest )
+            ]
+
+            DELETE >=> pathScan resourceIdPath deleteResourceById 
+            GET    >=> pathScan resourceIdPath getResourceById
+            PUT    >=> pathScan resourceIdPath updateResourceById
+            HEAD   >=> pathScan resourceIdPath isResourceExists
         ]

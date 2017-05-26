@@ -6,6 +6,4 @@
     open Suave.Operators
     open Suave.Filters 
 
-    let api = choose [ 
-        userWebPart
-    ]
+    let api = choose [ userWebPart ]

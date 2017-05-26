@@ -63,6 +63,7 @@
     <Compile Include="Main.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <None Include="SQL Scripts\create.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

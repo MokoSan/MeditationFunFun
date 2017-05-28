@@ -6,5 +6,5 @@ open MeditationFunFun.App
 
 [<EntryPoint>]
 let main argv = 
-    startWebServer defaultConfig app 
+    startWebServer defaultConfig api 
     0 

@@ -31,6 +31,10 @@ module MeditationFunFun.Api.Common
     let apiVersion    = "1" // TODO: Change this to read from a config
     let apiBaseString =  sprintf "/api/v%s/" apiVersion 
 
+    let setCORSHeaders webPartToCombine = 
+        setHeader  "Access-Control-Allow-Origin" "*" >=> 
+        setHeader "Access-Control-Allow-Headers" "content-type" >=> webPartToCombine
+
     let Jsonize ( objectToSerialize : obj ) : WebPart = 
         let jsonSerializerSettings = JsonSerializerSettings()
         jsonSerializerSettings.ContractResolver <- CamelCasePropertyNamesContractResolver()
@@ -75,13 +79,13 @@ module MeditationFunFun.Api.Common
 
         choose [
             path fullResourcePath >=> choose [
-                GET  >=> getAll
-                POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
-                PUT  >=> request ( getResourceFromRequest >> resource.Update >> handleResource badRequest )
+                setCORSHeaders GET  >=> getAll
+                setCORSHeaders POST >=> request ( getResourceFromRequest >> resource.Create >> Jsonize ) 
+                setCORSHeaders PUT  >=> request ( getResourceFromRequest >> resource.Update >> handleResource badRequest )
             ]
 
-            DELETE >=> pathScan resourceIdPath deleteResourceById 
-            GET    >=> pathScan resourceIdPath getResourceById
-            PUT    >=> pathScan resourceIdPath updateResourceById
-            HEAD   >=> pathScan resourceIdPath isResourceExists
+            setCORSHeaders DELETE >=> pathScan resourceIdPath deleteResourceById 
+            setCORSHeaders GET    >=> pathScan resourceIdPath getResourceById
+            setCORSHeaders PUT    >=> pathScan resourceIdPath updateResourceById
+            setCORSHeaders HEAD   >=> pathScan resourceIdPath isResourceExists
         ]

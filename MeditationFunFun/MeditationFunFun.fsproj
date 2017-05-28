@@ -61,16 +61,12 @@
     <Compile Include="Api.Controller.User.fs" />
     <Compile Include="Api.Controller.Journal.fs" />
     <Compile Include="App.fs" />
-    <Compile Include="View.fs" />
     <Compile Include="Main.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
     <None Include="SQL Scripts\createDb.sql" />
     <None Include="SQL Scripts\createUser.sql" />
     <None Include="SQL Scripts\createJournal.sql" />
-    <None Include="Web\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

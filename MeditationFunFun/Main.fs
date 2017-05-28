@@ -2,10 +2,7 @@
 
 open Suave 
 
-open MeditationFunFun.App 
-open View
-
-let app = choose [ api; view ]
+open MeditationFunFun.App
 
 [<EntryPoint>]
 let main argv = 

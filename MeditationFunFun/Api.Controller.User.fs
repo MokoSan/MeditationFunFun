@@ -53,7 +53,7 @@
         }
 
         let newUserDbo = createUserDboFromUser user
-        submitToDbAsync |> ignore
+        databaseContext.SubmitUpdates()
         newUser
 
     // PUT 
@@ -64,7 +64,7 @@
             let u = userById.Value 
             u.Name  <- userToUpdate.Name
             u.Email <- userToUpdate.Email
-            submitToDbAsync |> ignore
+            databaseContext.SubmitUpdates()
             Some userToUpdate
             
     let updateUser ( userToUpdate : User ) : User option =
@@ -76,7 +76,7 @@
         match user with 
         | Some u ->
             u.Delete() 
-            submitToDbAsync |> ignore
+            databaseContext.SubmitUpdates()
         | None   -> () 
 
     // HEAD

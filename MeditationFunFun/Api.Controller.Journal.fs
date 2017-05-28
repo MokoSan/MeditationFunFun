@@ -37,7 +37,7 @@
         newJournalDbo
 
     // GET
-    let getAllJournals() : seq < Journal > =
+    let getAllJournals() : seq <Journal> =
         dbo.Journals |> Seq.map getJournalFromJournalDbo
 
     let getJournalById ( journalId : int ) : Journal option = 
@@ -55,7 +55,6 @@
 
         let newJournalDbo = createJournalDboFromJournal journal
         databaseContext.SubmitUpdates()
-        //submitToDbAsync 
         newJournal 
 
     // PUT 
@@ -67,7 +66,7 @@
             j.Title            <- journalToUpdate.Title
             j.DateOfMeditation <- journalToUpdate.DateOfMeditation
             j.Content          <- journalToUpdate.Content
-            submitToDbAsync |> ignore
+            databaseContext.SubmitUpdates()
             Some journalToUpdate
 
     let updateJournal ( journalToUpdate : Journal ) : Journal option = 
@@ -79,7 +78,8 @@
         match journal with
         | Some j ->
             j.Delete()
-            submitToDbAsync |> ignore
+            databaseContext.SubmitUpdates()
+             |> ignore
         | None   -> ()
 
     // HEAD

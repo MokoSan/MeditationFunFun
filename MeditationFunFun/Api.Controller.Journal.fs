@@ -54,7 +54,8 @@
         }
 
         let newJournalDbo = createJournalDboFromJournal journal
-        submitToDbAsync |> ignore
+        databaseContext.SubmitUpdates()
+        //submitToDbAsync 
         newJournal 
 
     // PUT 
@@ -85,7 +86,7 @@
     let isJournalExists ( journalId : int ) = ( getJournalDboFromId journalId ).IsSome
 
     let journalWebPart = getWebPartFromRestResource {
-        Name       = "journal"
+        Name       = "journals"
         GetAll     = getAllJournals 
         GetById    = getJournalById
         Create     = createNewJournal

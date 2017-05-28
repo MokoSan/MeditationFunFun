@@ -84,7 +84,7 @@
         
     // Combined web part
     let userWebPart = getWebPartFromRestResource {
-        Name       = "user"
+        Name       = "users"
         GetAll     = getAllUsers
         GetById    = getUserById
         Create     = createUser

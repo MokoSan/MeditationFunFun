@@ -8,4 +8,4 @@
     open Api.Controller.User
     open Api.Controller.Journal
 
-    let api = choose [ journalWebPart ; userWebPart ]
+    let api = choose [ userWebPart ]
